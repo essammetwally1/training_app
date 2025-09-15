@@ -1,28 +1,25 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:training_app/components/custom_elevetedbutton.dart';
 import 'package:training_app/components/custom_textfeild.dart';
+import 'package:training_app/screens/home_screen.dart';
+import 'package:training_app/services/firebase_service.dart';
+import 'package:training_app/utilis.dart';
 
 class LoginForm extends StatefulWidget {
-  final TextEditingController? usernameController;
-  final TextEditingController? emailController;
-  final TextEditingController? passwordController;
   final VoidCallback? onLoginPressed;
   final VoidCallback? onForgotPasswordPressed;
   final VoidCallback? onCreateAccountPressed;
   final Function(bool)? move;
-  final bool isLoading;
 
   const LoginForm({
     super.key,
-    this.usernameController,
-    this.emailController,
-    this.passwordController,
+
     this.onLoginPressed,
     this.onForgotPasswordPressed,
     this.onCreateAccountPressed,
-    this.isLoading = false,
     this.move,
   });
 
@@ -35,6 +32,7 @@ class _LoginFormState extends State<LoginForm> {
   TextEditingController nameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+  bool isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -43,22 +41,6 @@ class _LoginFormState extends State<LoginForm> {
       child: Column(
         children: [
           SizedBox(height: MediaQuery.sizeOf(context).height * .1),
-          CustomTextField(
-            iconPathName: 'profile',
-            hintText: 'Enter your user name',
-            isPassword: false,
-            isEmail: false,
-            controller: widget.usernameController,
-            validator: (value) {
-              if (value!.isEmpty) {
-                return 'Enter Your Name';
-              } else {
-                return null;
-              }
-            },
-          ),
-
-          SizedBox(height: 24),
 
           // Email Field
           CustomTextField(
@@ -66,7 +48,7 @@ class _LoginFormState extends State<LoginForm> {
             hintText: 'Enter your email',
             isPassword: false,
             isEmail: true,
-            controller: widget.emailController,
+            controller: emailController,
             validator: (value) {
               if (value!.isEmpty) {
                 return 'Enter e-mail';
@@ -86,7 +68,7 @@ class _LoginFormState extends State<LoginForm> {
             hintText: 'Enter your password',
             isPassword: true,
             isEmail: false,
-            controller: widget.passwordController,
+            controller: passwordController,
             validator: (value) {
               if (value!.isEmpty) {
                 return 'Enter password';
@@ -106,16 +88,10 @@ class _LoginFormState extends State<LoginForm> {
             children: [
               Expanded(
                 child: CustomElevetedButton(
+                  isLoading: isLoading,
+
                   text: 'Login',
-                  onPressed: () {
-                    if (globalKey.currentState!.validate()) {
-                      HapticFeedback.lightImpact();
-                      Fluttertoast.showToast(msg: 'Login button pressed');
-                      widget.onLoginPressed?.call();
-                    }
-                    widget.move!(true);
-                  },
-                  isLoading: widget.isLoading,
+                  onPressed: login,
                 ),
               ),
               SizedBox(width: 24),
@@ -173,5 +149,62 @@ class _LoginFormState extends State<LoginForm> {
         ],
       ),
     );
+  }
+
+  Future<void> login() async {
+    if (globalKey.currentState!.validate()) {
+      if (isLoading) return;
+
+      setState(() {
+        isLoading = true;
+      });
+
+      try {
+        final user = await FirebaseService.logIn(
+          email: emailController.text.trim(),
+          password: passwordController.text.trim(),
+        );
+
+        // Provider.of<UserProvider>(
+        //   context,
+        //   listen: false,
+        // ).updateCurrentUser(user);
+
+        Utilis.showSuccessMessage('Login Success');
+
+        Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
+      } catch (error) {
+        String errorMessage = 'Login failed. Please try again.';
+
+        if (error is FirebaseAuthException) {
+          switch (error.code) {
+            case 'user-not-found':
+              errorMessage = 'No user found with this email.';
+              break;
+            case 'wrong-password':
+              errorMessage = 'Incorrect password. Please try again.';
+              break;
+            case 'invalid-email':
+              errorMessage = 'Please enter a valid email address.';
+              break;
+            case 'user-disabled':
+              errorMessage = 'This account has been disabled.';
+              break;
+            default:
+              errorMessage = error.message ?? 'Login failed.';
+          }
+        } else if (error is FirebaseException) {
+          errorMessage = error.message ?? 'Firebase error occurred.';
+        }
+
+        Utilis.showErrorMessage(errorMessage);
+      } finally {
+        if (mounted) {
+          setState(() {
+            isLoading = false;
+          });
+        }
+      }
+    }
   }
 }

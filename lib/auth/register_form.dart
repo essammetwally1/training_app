@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:training_app/components/custom_elevetedbutton.dart';
 import 'package:training_app/components/custom_textfeild.dart';
 import 'package:training_app/models/user_model.dart';
-import 'package:training_app/screens/home_screen.dart';
 import 'package:training_app/services/firebase_service.dart';
 import 'package:training_app/utilis.dart';
 
@@ -129,24 +128,24 @@ class _RegisterFormState extends State<RegisterForm> {
           SizedBox(height: 24),
 
           // phone number Field
-          // CustomTextField(
-          //   controller: phoneController,
-          //   hintText: 'Phone Number',
-          //   iconPathName: 'phone',
-          //   validator: (value) {
-          //     if (value!.isEmpty) {
-          //       return 'Enter phone number';
-          //     } else if (!value.startsWith('+2')) {
-          //       return 'Phone number must start with +2';
-          //     } else if (!RegExp(r'^\+2[0-9]{11}$').hasMatch(value)) {
-          //       return 'Enter valid phone number (+2 followed by 11 digits)';
-          //     } else {
-          //       return null;
-          //     }
-          //   },
-          // ),
+          CustomTextField(
+            controller: phoneController,
+            hintText: 'Phone Number',
+            iconPathName: 'phone',
+            validator: (value) {
+              if (value!.isEmpty) {
+                return 'Enter phone number';
+              } else if (!value.startsWith('+2')) {
+                return 'Phone number must start with +2';
+              } else if (!RegExp(r'^\+2[0-9]{11}$').hasMatch(value)) {
+                return 'Enter valid phone number (+2 followed by 11 digits)';
+              } else {
+                return null;
+              }
+            },
+          ),
 
-          // SizedBox(height: 24),
+          SizedBox(height: 24),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -190,7 +189,7 @@ class _RegisterFormState extends State<RegisterForm> {
 
   Future<void> register() async {
     if (globalKey.currentState!.validate()) {
-      if (isLoading) return; // Prevent multiple clicks
+      if (isLoading) return;
 
       setState(() {
         isLoading = true;
@@ -211,7 +210,7 @@ class _RegisterFormState extends State<RegisterForm> {
 
         // Navigator.of(context).pushReplacementNamed(LoginScreen.routeName);
         Utilis.showSuccessMessage('Register Success');
-        Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
+        widget.move!(true);
       } catch (error) {
         log('Registration error: ${error.toString()}');
 

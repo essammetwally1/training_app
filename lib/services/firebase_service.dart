@@ -38,4 +38,36 @@ class FirebaseService {
       rethrow;
     }
   }
+
+  static Future<UserModel> logIn({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      UserCredential userCredential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: email, password: password);
+
+      CollectionReference<UserModel> usersCollection = getUsersCollection();
+      DocumentSnapshot<UserModel> docSnapshot = await usersCollection
+          .doc(userCredential.user!.uid)
+          .get();
+
+      if (docSnapshot.exists && docSnapshot.data() != null) {
+        return docSnapshot.data()!;
+      } else {
+        throw Exception('User data not found. Please contact support.');
+      }
+    } on FirebaseAuthException catch (e) {
+      log('Firebase Auth Error: ${e.code} - ${e.message}');
+      rethrow;
+    } on FirebaseException catch (e) {
+      log('Firestore Error: ${e.code} - ${e.message}');
+      throw Exception('Failed to access user data. Please try again.');
+    } catch (e) {
+      log('Unexpected error during login: $e');
+      throw Exception('An unexpected error occurred. Please try again.');
+    }
+  }
+
+  static Future<void> signOut() => FirebaseAuth.instance.signOut();
 }
