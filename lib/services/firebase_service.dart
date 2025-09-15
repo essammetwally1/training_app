@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:training_app/models/user_model.dart';
@@ -13,11 +12,11 @@ class FirebaseService {
                 UserModel.fromJson(docSnapshot.data()!),
             toFirestore: (user, _) => user.toJson(),
           );
+
   static Future<UserModel> register({
     required String name,
     required String password,
     required String email,
-    required String phone,
   }) async {
     try {
       UserCredential userCredential = await FirebaseAuth.instance
@@ -28,7 +27,6 @@ class FirebaseService {
         id: userCredential.user!.uid,
         name: name,
         email: email,
-        phone: phone,
       );
 
       CollectionReference<UserModel> usersCollection = getUsersCollection();
@@ -37,7 +35,7 @@ class FirebaseService {
       return userModel;
     } catch (e) {
       log('Firebase registration error: $e');
-      rethrow; // Re-throw the error to handle it in the UI
+      rethrow;
     }
   }
 }

@@ -1,11 +1,15 @@
+import 'dart:developer';
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:training_app/components/custom_elevetedbutton.dart';
 import 'package:training_app/components/custom_textfeild.dart';
+import 'package:training_app/models/user_model.dart';
+import 'package:training_app/screens/home_screen.dart';
+import 'package:training_app/services/firebase_service.dart';
+import 'package:training_app/utilis.dart';
 
 class RegisterForm extends StatefulWidget {
-  final TextEditingController? usernameController;
-  final TextEditingController? emailController;
-  final TextEditingController? passwordController;
   final VoidCallback? onLoginPressed;
   final VoidCallback? onForgotPasswordPressed;
   final VoidCallback? onCreateAccountPressed;
@@ -13,9 +17,6 @@ class RegisterForm extends StatefulWidget {
 
   const RegisterForm({
     super.key,
-    this.usernameController,
-    this.emailController,
-    this.passwordController,
     this.onLoginPressed,
     this.onForgotPasswordPressed,
     this.onCreateAccountPressed,
@@ -47,7 +48,7 @@ class _RegisterFormState extends State<RegisterForm> {
             hintText: 'Enter your user name',
             isPassword: false,
             isEmail: false,
-            controller: widget.usernameController,
+            controller: nameController,
             validator: (value) {
               if (value!.isEmpty) {
                 return 'Enter Your Name';
@@ -65,7 +66,7 @@ class _RegisterFormState extends State<RegisterForm> {
             hintText: 'Enter your email',
             isPassword: false,
             isEmail: true,
-            controller: widget.emailController,
+            controller: emailController,
             validator: (value) {
               if (value!.isEmpty) {
                 return 'Enter e-mail';
@@ -126,26 +127,26 @@ class _RegisterFormState extends State<RegisterForm> {
           ),
 
           SizedBox(height: 24),
+
           // phone number Field
-          CustomTextField(
-            controller: phoneController,
-            hintText: 'Phone Number',
-            iconPathName: 'phone',
-            validator: (value) {
-              if (value!.isEmpty) {
-                return 'Enter phone number';
-              } else if (!value.startsWith('+2')) {
-                return 'Phone number must start with +2';
-              } else if (!RegExp(r'^\+2[0-9]{11}$').hasMatch(value)) {
-                return 'Enter valid phone number (+2 followed by 11 digits)';
-              } else {
-                return null;
-              }
-            },
-          ),
+          // CustomTextField(
+          //   controller: phoneController,
+          //   hintText: 'Phone Number',
+          //   iconPathName: 'phone',
+          //   validator: (value) {
+          //     if (value!.isEmpty) {
+          //       return 'Enter phone number';
+          //     } else if (!value.startsWith('+2')) {
+          //       return 'Phone number must start with +2';
+          //     } else if (!RegExp(r'^\+2[0-9]{11}$').hasMatch(value)) {
+          //       return 'Enter valid phone number (+2 followed by 11 digits)';
+          //     } else {
+          //       return null;
+          //     }
+          //   },
+          // ),
 
-          SizedBox(height: 24),
-
+          // SizedBox(height: 24),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -178,11 +179,7 @@ class _RegisterFormState extends State<RegisterForm> {
           CustomElevetedButton(
             isLoading: isLoading,
             text: 'Create Account',
-            onPressed: () {
-              if (globalKey.currentState!.validate()) {
-                widget.move!(true);
-              }
-            },
+            onPressed: register,
           ),
 
           SizedBox(height: 24),
@@ -190,4 +187,75 @@ class _RegisterFormState extends State<RegisterForm> {
       ),
     );
   }
+
+  Future<void> register() async {
+    if (globalKey.currentState!.validate()) {
+      if (isLoading) return; // Prevent multiple clicks
+
+      setState(() {
+        isLoading = true;
+      });
+
+      try {
+        final UserModel user = await FirebaseService.register(
+          name: nameController.text.trim(),
+          password: passwordController.text.trim(),
+          email: emailController.text.trim(),
+        );
+        log(user.toString());
+
+        // Provider.of<UserProvider>(
+        //   context,
+        //   listen: false,
+        // ).updateCurrentUser(user);
+
+        // Navigator.of(context).pushReplacementNamed(LoginScreen.routeName);
+        Utilis.showSuccessMessage('Register Success');
+        Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
+      } catch (error) {
+        log('Registration error: ${error.toString()}');
+
+        String errorMessage = 'Registration failed. Please try again.';
+
+        if (error is FirebaseAuthException) {
+          switch (error.code) {
+            case 'email-already-in-use':
+              errorMessage = 'This email is already registered.';
+              break;
+            case 'invalid-email':
+              errorMessage = 'Please enter a valid email address.';
+              break;
+            case 'operation-not-allowed':
+              errorMessage = 'Email/password accounts are not enabled.';
+              break;
+            case 'weak-password':
+              errorMessage = 'Password is too weak.';
+              break;
+            default:
+              errorMessage = error.message ?? 'Registration failed.';
+          }
+        } else if (error is FirebaseException) {
+          errorMessage = error.message ?? 'Firebase error occurred.';
+        }
+
+        Utilis.showErrorMessage(errorMessage);
+      } finally {
+        if (mounted) {
+          setState(() {
+            isLoading = false;
+          });
+        }
+      }
+    }
+  }
+
+  // void register() {
+  //   if (globalKey.currentState!.validate()) {
+  //     if (passwordController.text != confirmPasswordController.text) {
+  //       Utilis.showErrorMessage('Passwords do not match');
+  //       return;
+  //     }
+  //     registerUser();
+  //   }
+  // }
 }

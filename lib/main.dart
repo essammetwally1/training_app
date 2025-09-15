@@ -1,9 +1,12 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:training_app/auth/auth_screen.dart';
-import 'package:training_app/onboarding/onboarding_scree.dart';
+import 'package:training_app/onboarding/onboarding_screen.dart';
 import 'package:training_app/screens/home_screen.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(TrainingApp());
 }
 
@@ -14,7 +17,6 @@ class TrainingApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: OnboardingScreen.routeName,
       theme: ThemeData(
         splashColor: Colors.transparent,
         highlightColor: Colors.transparent,
@@ -30,6 +32,7 @@ class TrainingApp extends StatelessWidget {
         AuthScreen.routeName: (context) => AuthScreen(),
         OnboardingScreen.routeName: (context) => OnboardingScreen(),
       },
+      initialRoute: AuthScreen.routeName,
     );
   }
 }
