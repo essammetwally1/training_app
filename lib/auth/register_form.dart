@@ -2,9 +2,11 @@ import 'dart:developer';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:training_app/components/custom_elevetedbutton.dart';
 import 'package:training_app/components/custom_textfeild.dart';
 import 'package:training_app/models/user_model.dart';
+import 'package:training_app/provider/user_provider.dart';
 import 'package:training_app/services/firebase_service.dart';
 import 'package:training_app/utilis.dart';
 
@@ -200,13 +202,11 @@ class _RegisterFormState extends State<RegisterForm> {
           name: nameController.text.trim(),
           password: passwordController.text.trim(),
           email: emailController.text.trim(),
+          phone: phoneController.text.trim(),
         );
         log(user.toString());
 
-        // Provider.of<UserProvider>(
-        //   context,
-        //   listen: false,
-        // ).updateCurrentUser(user);
+        Provider.of<UserProvider>(context, listen: false).upDateUser(user);
 
         // Navigator.of(context).pushReplacementNamed(LoginScreen.routeName);
         Utilis.showSuccessMessage('Register Success');

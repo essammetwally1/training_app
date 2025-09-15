@@ -17,6 +17,7 @@ class FirebaseService {
     required String name,
     required String password,
     required String email,
+    required String phone,
   }) async {
     try {
       UserCredential userCredential = await FirebaseAuth.instance
@@ -27,6 +28,7 @@ class FirebaseService {
         id: userCredential.user!.uid,
         name: name,
         email: email,
+        phone: phone,
       );
 
       CollectionReference<UserModel> usersCollection = getUsersCollection();

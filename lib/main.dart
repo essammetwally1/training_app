@@ -1,13 +1,20 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:training_app/auth/auth_screen.dart';
 import 'package:training_app/onboarding/onboarding_screen.dart';
+import 'package:training_app/provider/user_provider.dart';
 import 'package:training_app/screens/home_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(TrainingApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => UserProvider(),
+      child: TrainingApp(),
+    ),
+  );
 }
 
 class TrainingApp extends StatelessWidget {

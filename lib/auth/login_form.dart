@@ -2,8 +2,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:provider/provider.dart';
 import 'package:training_app/components/custom_elevetedbutton.dart';
 import 'package:training_app/components/custom_textfeild.dart';
+import 'package:training_app/provider/user_provider.dart';
 import 'package:training_app/screens/home_screen.dart';
 import 'package:training_app/services/firebase_service.dart';
 import 'package:training_app/utilis.dart';
@@ -165,10 +167,7 @@ class _LoginFormState extends State<LoginForm> {
           password: passwordController.text.trim(),
         );
 
-        // Provider.of<UserProvider>(
-        //   context,
-        //   listen: false,
-        // ).updateCurrentUser(user);
+        Provider.of<UserProvider>(context, listen: false).upDateUser(user);
 
         Utilis.showSuccessMessage('Login Success');
 
