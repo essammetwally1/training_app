@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:training_app/components/custom_elevetedbutton.dart';
 import 'package:training_app/components/custom_textfeild.dart';
 import 'package:training_app/provider/user_provider.dart';
-import 'package:training_app/screens/home_screen.dart';
+import 'package:training_app/screens/profile_screen.dart';
 import 'package:training_app/services/firebase_service.dart';
 import 'package:training_app/utilis.dart';
 
@@ -171,7 +171,7 @@ class _LoginFormState extends State<LoginForm> {
 
         Utilis.showSuccessMessage('Login Success');
 
-        Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
+        Navigator.of(context).pushReplacementNamed(ProfileScreen.routeName);
       } catch (error) {
         String errorMessage = 'Login failed. Please try again.';
 

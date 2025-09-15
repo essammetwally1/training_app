@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:training_app/auth/auth_screen.dart';
 import 'package:training_app/onboarding/onboarding_screen.dart';
 import 'package:training_app/provider/user_provider.dart';
-import 'package:training_app/screens/home_screen.dart';
+import 'package:training_app/screens/profile_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,11 +35,11 @@ class TrainingApp extends StatelessWidget {
         ),
       ),
       routes: {
-        HomeScreen.routeName: (context) => HomeScreen(),
+        ProfileScreen.routeName: (context) => ProfileScreen(),
         AuthScreen.routeName: (context) => AuthScreen(),
         OnboardingScreen.routeName: (context) => OnboardingScreen(),
       },
-      initialRoute: AuthScreen.routeName,
+      initialRoute: OnboardingScreen.routeName,
     );
   }
 }
